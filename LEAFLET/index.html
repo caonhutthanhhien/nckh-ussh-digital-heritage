@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Bản đồ tham quan USSH
+    </title>
+
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+
+    <style>
+
+        /* ========================================
+           TOÀN BỘ TRANG
+           ======================================== */
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+
+            font-family: Arial, sans-serif;
+        }
+
+
+        /* ========================================
+           BẢN ĐỒ
+           ======================================== */
+
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+
+
+        /* ========================================
+           POPUP USSH
+           ======================================== */
+
+        .ussh-popup {
+
+            width: 320px;
+            max-width: 320px;
+
+            max-height: 500px;
+
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            box-sizing: border-box;
+
+            font-family: Arial, sans-serif;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+
+            padding: 4px 8px 8px 4px;
+
+            word-wrap: break-word;
+
+            overflow-wrap: anywhere;
+
+        }
+
+
+        /* Đảm bảo toàn bộ nội dung
+           không vượt khỏi popup */
+
+        .ussh-popup * {
+
+            max-width: 100%;
+
+            box-sizing: border-box;
+
+        }
+
+
+        /* Các đoạn văn */
+
+        .ussh-popup p {
+
+            max-width: 100%;
+
+            margin: 0 0 12px 0;
+
+            box-sizing: border-box;
+
+            word-wrap: break-word;
+
+            overflow-wrap: break-word;
+
+            white-space: normal;
+
+        }
+
+
+        /* ========================================
+           TIÊU ĐỀ TRƯỜNG
+           ======================================== */
+
+        .ussh-popup-title {
+
+            margin: 0 0 5px 0;
+
+            font-size: 21px;
+
+            line-height: 1.3;
+
+            font-weight: 700;
+
+        }
+
+
+        /* Dòng USSH-VNUHCM */
+
+        .ussh-popup-subtitle {
+
+            font-size: 13px;
+
+            opacity: 0.7;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        /* ========================================
+           TIÊU ĐỀ CÁC PHẦN
+           ======================================== */
+
+        .ussh-section-title {
+
+            margin-top: 18px;
+
+            margin-bottom: 10px;
+
+            padding-bottom: 6px;
+
+            border-bottom: 2px solid #ddd;
+
+            font-size: 15px;
+
+            line-height: 1.4;
+
+            letter-spacing: 0.5px;
+
+        }
+
+
+        /* Nội dung các phần */
+
+        .ussh-section-content {
+
+            font-size: 14px;
+
+            line-height: 1.6;
+
+        }
+
+
+        /* ========================================
+           TUYẾN THAM QUAN
+           ======================================== */
+
+        .tour-route {
+
+            margin: 15px 0;
+
+            width: 100%;
+
+        }
+
+
+        /* Từng điểm tham quan */
+
+        .tour-stop {
+
+            display: flex;
+
+            align-items: flex-start;
+
+            gap: 10px;
+
+            width: 100%;
+
+            padding: 9px 10px;
+
+            margin-bottom: 2px;
+
+            border-radius: 6px;
+
+            background: #f5f5f5;
+
+            font-size: 14px;
+
+            line-height: 1.4;
+
+            box-sizing: border-box;
+
+        }
+
+
+        /* Số thứ tự */
+
+        .tour-number {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            width: 25px;
+
+            min-width: 25px;
+
+            height: 25px;
+
+            border-radius: 50%;
+
+            background: #333;
+
+            color: white;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            flex-shrink: 0;
+
+        }
+
+
+        /* Mũi tên */
+
+        .tour-arrow {
+
+            text-align: center;
+
+            margin: 3px 0;
+
+            font-size: 18px;
+
+            line-height: 1.2;
+
+        }
+
+
+        /* ========================================
+           NÚT THAM QUAN 360°
+           ======================================== */
+
+        .tour-button {
+
+            display: block;
+
+            width: 100%;
+
+            padding: 12px 15px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            line-height: 1.4;
+
+            font-weight: bold;
+
+            margin-top: 10px;
+
+            box-sizing: border-box;
+
+            white-space: normal;
+
+        }
+
+
+        .tour-button:hover {
+
+            opacity: 0.85;
+
+        }
+
+
+        /* ========================================
+           THANH CUỘN POPUP
+           ======================================== */
+
+        .ussh-popup::-webkit-scrollbar {
+
+            width: 7px;
+
+        }
+
+
+        .ussh-popup::-webkit-scrollbar-thumb {
+
+            border-radius: 10px;
+
+            background: #bbb;
+
+        }
+
+
+        .ussh-popup::-webkit-scrollbar-track {
+
+            background: #f1f1f1;
+
+        }
+
+
+        /* ========================================
+           HIỂN THỊ TỐT HƠN TRÊN ĐIỆN THOẠI
+           ======================================== */
+
+        @media (max-width: 600px) {
+
+            .ussh-popup {
+
+                width: 270px;
+
+                max-width: 270px;
+
+                max-height: 450px;
+
+                font-size: 13px;
+
+            }
+
+
+            .ussh-popup-title {
+
+                font-size: 18px;
+
+            }
+
+
+            .ussh-section-title {
+
+                font-size: 14px;
+
+            }
+
+
+            .ussh-section-content {
+
+                font-size: 13px;
+
+            }
+
+
+            .tour-stop {
+
+                font-size: 13px;
+
+            }
+
+
+            .tour-button {
+
+                font-size: 14px;
+
+                padding: 11px 12px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ========================================
+         BẢN ĐỒ
+         ======================================== -->
+
+    <div id="map"></div>
+
+
+    <!-- ========================================
+         LEAFLET JAVASCRIPT
+         ======================================== -->
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+
+    <!-- ========================================
+         CODE CỦA CHÚNG TA
+         ======================================== -->
+
+    <script src="script.js"></script>
+
+
+</body>
+
+</html>
