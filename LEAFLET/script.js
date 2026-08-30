@@ -162,5 +162,5 @@ usshMarker.bindPopup(`
 
 function openTour() {
     window.location.href =
-        "/nckh-ussh-digital-heritage/29-8-2026%20tour%20mau/project-title/app-files/index.html";
+        "../29-8-2026%20tour%20mau/project-title/app-files/index.html";
 }
